@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import filedialog
 from image_resizer_module import *
 from PIL import Image, ImageTk
+import imageExtentions
 
 def check_size(size):
     if size == "width" or size == "height":
@@ -15,19 +16,19 @@ def check_size(size):
 toplevels = []
 def create_toplevel(path, w, h):
     global toplevels
-    toplevels[0].destroy() if len(toplevels) else None
+    toplevels[len(toplevels)-1].destroy() if len(toplevels) else None
+    photo = ImageTk.PhotoImage(file=path)
 
     toplevel = Toplevel(root)
     toplevel.title(f"{w}x{h}")
-    photo = ImageTk.PhotoImage(file=path)
-    img = Label(toplevel, text="hi", image=photo)
+    img = Label(toplevel, image=photo)
     img.image = photo
     img.pack()
 
-    toplevels.append(toplevel)
+    toplevels += [toplevel]
 
 def open_file():
-    path = filedialog.askopenfilename(title="select image", filetypes=(("png files",".png"),))
+    path = filedialog.askopenfilename(title="select image", filetypes=(("images file", imageExtentions.extentions),))
     filepath.config(text="your image path: " + path)
     size = Image.open(path).size
     create_toplevel(path, *size)
@@ -76,7 +77,7 @@ width= Entry(
     width=10
 )
 width.insert(0, "width")
-width.bind("<FocusIn>", lambda x: width.delete(0,END))
+width.bind("<FocusIn>", lambda x: width.delete(0,END) if width.get() == "width" else None)
 width.pack()
 
 height = Entry(
@@ -86,7 +87,7 @@ height = Entry(
     width=10
 )
 height.insert(0, "height")
-height.bind("<FocusIn>", lambda x: height.delete(0,END))
+height.bind("<FocusIn>", lambda x: height.delete(0,END) if height.get() == "height" else None)
 height.pack()
 
 Button(
@@ -95,9 +96,10 @@ Button(
     command=resize_image
 ).pack()
 
-img = Label(
+Label(
     frame1,
-)
-img.pack()
+    text="size by default will be 300",
+    fg="red"
+).pack()
 
 root.mainloop()
